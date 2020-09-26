@@ -1,0 +1,46 @@
+import java.util.*;
+class Kodilla {
+    public static void main (String[] args) {
+        Map<Integer,String> myFavoriteColors = new HashMap<>();
+        Map<Integer,String> myFriendsFavoriteColors = new HashMap<>();
+        
+        myFavoriteColors.put(1, "Red");
+        myFavoriteColors.put(2, "Green");
+        myFavoriteColors.put(3, "Black");
+        
+        myFriendsFavoriteColors.put(4, "White");
+        myFriendsFavoriteColors.put(5, "Blue");
+        myFriendsFavoriteColors.put(6, "Orange");
+                
+        Map<Integer,String> ourFavoriteColors = new HashMap<>();
+        // Connector connector = new Connector();
+        
+        // czy ten obiekt klasy Connector zostanie usuniety z pamieci po wykonaniu instrukcji?
+        ourFavoriteColors = new Connector().run(myFavoriteColors, myFriendsFavoriteColors);
+        
+        System.out.println("Values in first map: " + myFavoriteColors);        
+        System.out.println("Values in second map: " + myFriendsFavoriteColors);    
+        System.out.println("Values in connected map: " + ourFavoriteColors);    
+   }
+}
+
+class Connector {
+    public Map<Integer,String> run( Map<Integer,String> map1,  Map<Integer,String> map2) {
+        
+        Map<Integer,String> map3 = new HashMap<>();
+        
+        for(Map.Entry entry : map1.entrySet()) {
+                Integer key = (Integer)entry.getKey();
+                String value = (String)entry.getValue();
+                map3.put(key, value);
+        }
+        
+        for(Map.Entry entry : map2.entrySet()) {
+            Integer key = (Integer)entry.getKey();
+            String value = (String)entry.getValue();
+            map3.put(key, value);
+        }
+        return map3;
+    }
+}
+        
