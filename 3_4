@@ -1,0 +1,91 @@
+import java.util.*;
+
+class Kodilla {
+   public static void main (String[] args) {
+       
+        Random random = new Random();
+        Snake snake = new Snake(); 
+       
+        Deque<String> lines = new ArrayDeque<>();        
+        Deque<String> linesEven = new ArrayDeque<>();
+        Deque<String> linesNotEven = new ArrayDeque<>();
+            
+        for (int i=1; i<=50; i++) {
+            lines.add(snake.draw(random));
+        }
+        
+        System.out.println("Common set:");
+        snake.print(lines);
+        
+        snake.split(lines, linesEven, linesNotEven);
+        
+        System.out.println("\nCommon set:");
+        snake.print(lines);
+        
+        System.out.println("\nEven set:");
+        snake.print(linesEven);
+        
+        System.out.println("\nNot even set:");
+        snake.print(linesNotEven);
+       
+   }
+}
+
+class Snake {
+     
+    public String draw(Random rand) {
+        String line = "";
+        int q = 0;
+        
+        do {
+            q = rand.nextInt(50);
+        } while (q < 1);
+        
+        for (int i=q; i>0; i--) {
+            line += 'a';
+        }
+        //return line+" "+q+" "+line.length(); //debug
+        return line;
+    }
+    
+    public void split (Deque<String> queue, Deque<String> even, Deque<String> notEven) {
+        System.out.println("\nSplitting set...");
+        while (queue.peek()!=null) {
+            String element = queue.poll();
+            if(element.length()%2==0) {
+                even.add(element);
+            } else {
+                notEven.add(element);   
+            }
+        }
+        System.out.println("Done");
+    }
+    
+    public void print (Deque<String> queue) {
+        if (queue.size()!=0) {
+            //int i=0; //debug
+            for(String line: queue) {
+                //i++; //debug
+                //System.out.print(i+". "); //debug
+                System.out.println(line);
+            }
+        } else {
+            System.out.println("empty");
+        }
+    }
+}
+       
+/*
+Część 1
+
+Napisz program, który w kolejce ArrayDeque umieści 50 obiektów przechowujących napisy, 
+składające się z litery 'a' powtórzonej losową ilość razy (zakres powtórzeń: 1-50).
+Wypełnienie obiektu powtórzeniami litery 'a' zrealizuj przy pomocy pętli for.
+
+Część 2
+
+Program z części pierwszej rozbuduj w taki sposób, że przekażesz utworzoną kolejkę
+do metody Twojej klasy, która dokona rozdzielenia obiektów z kolejki na dwie kolekcje 
+ArrayList. Jedna z nich będzie przechowywała obiekty o parzystej liczbie znaków 'a', 
+a druga o nieparzystej.
+*/
