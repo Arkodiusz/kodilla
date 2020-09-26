@@ -1,0 +1,149 @@
+//package com.company;
+
+import java.util.*;
+
+class Main {
+
+    public static int orderCounter=100;
+    public static Set<Order> orders = new HashSet<>();
+
+    public static void main(String[] args) {
+
+        Manager manager = new Manager();
+
+        for (int i=0; i<10; i++) {
+            manager.orderAdd(orderCounter);
+        }
+        manager.orderAdd(orderCounter-5);
+        manager.orderAdd(orderCounter+2);
+        manager.orderAdd(orderCounter);
+        manager.orderAdd(orderCounter);
+        manager.orderAdd(orderCounter);
+
+        System.out.println("\nSET SIZE: " + orders.size() + "\n");
+
+        manager.orderCancel("OR500");
+        manager.orderCancel("OR107");
+        
+        manager.orderComplete("OR108");
+
+        manager.orderShowStatus("OR500");
+        manager.orderShowStatus("OR106");
+        manager.orderShowStatus("OR107");
+        manager.orderShowStatus("OR108");
+
+    }
+}
+class Manager {
+    public void orderAdd(int no) {
+        System.out.print("Adding order " + Order.type + no + ": ");
+        if (Main.orders.add(new Order(no))) {
+            System.out.println("DONE");
+            Main.orderCounter++;
+            for(Order o: Main.orders) {
+                if (Main.orderCounter==o.getNo()) Main.orderCounter++;
+            }
+        }
+        else System.out.println("ERROR, ORDER ALREADY EXIST");
+    }
+
+    public boolean orderCancel(String order) {
+        for(Order o: Main.orders) {
+            if(order.equals(o.toString())) {
+                System.out.println(o + " CANCELLED!");
+                o.setCancelled();
+                return true;
+            }
+        }
+        System.out.println("ORDER " + order + " NOT FOUND");
+        return false;
+    }
+    
+    public boolean orderComplete(String order) {
+        for(Order o: Main.orders) {
+            if(order.equals(o.toString())) {
+                System.out.println(o + " COMPLETED!");
+                o.setCompleted();
+                return true;
+            }
+        }
+        System.out.println("ORDER " + order + " NOT FOUND");
+        return false;
+    }
+
+    public void orderShowStatus(String order) throws IllegalStateException {
+        boolean found=false;
+        for (Order o : Main.orders) {
+            if (order.equals(o.toString())) {
+                found=true;
+                String status;
+                switch (o.getStatus()) {
+                    case 0:
+                        status = "cancelled";
+                        break;
+                    case 1:
+                        status = "in progress";
+                        break;
+                    case 2:
+                        status = "completed";
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + o.getStatus());
+                }
+                System.out.println(o.toString() + " status: " + status);
+            }
+        }
+        if (!found) System.out.println("ORDER " + order + " NOT FOUND");
+    }
+}
+
+class Order {
+    public static final String type = "OR";
+    private final int no;
+    private int status; //0-cancelled, 1=in progress, 2-completed
+    List<Integer> items;
+
+    //constructor
+    public Order (int no) {
+        this.no = no;
+        this.setInProgress();
+        items = new LinkedList<>();
+    }
+
+    public int getNo() {
+        return this.no;
+    }
+
+    public int getStatus() {
+        return this.status;
+    }
+
+    public boolean setCancelled() {
+        this.status = 0;
+        return true;
+    }
+    public boolean setInProgress() {
+        this.status = 1;
+        return true;
+    }
+    public boolean setCompleted() {
+        this.status = 2;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return Order.type + this.no;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        Order order = (Order)o;
+        return Order.type.equals(order.type) && this.no==order.no;
+    }
+
+    @Override
+    public int hashCode() {
+        return Order.type.hashCode()+this.no;
+    }
+}
