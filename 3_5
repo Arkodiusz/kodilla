@@ -1,0 +1,191 @@
+import java.util.*;
+
+class Main {
+    // chars allowed in gnerated strings
+    public static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+    
+    // static Random object to avoid passing it in StringGenerator.run()
+    public static Random random = new Random();
+       
+    public static void main (String[] args) {
+        
+        int dbSize = 500000;
+        
+        System.out.println("LINKED LIST SPEED TEST\n");
+                
+        StringGenerator sg = new StringGenerator();        
+        LinkedList<Book> list = new LinkedList<>();
+        ListHandler listHandler = new ListHandler();
+        
+        // filling list with random books
+        for(int i=0; i<dbSize; i++) { 
+            list.add(new Book(sg.run(7), sg.run(8)));
+        }
+        
+        listHandler.add(list, new Book("Tom Clancy", "Czerwony październik"), 0);
+        listHandler.add(list, new Book("Adam Mickiewicz", "Dziady"), list.size());
+                
+        listHandler.delete(list, list.peekFirst());
+        listHandler.delete(list, list.peekLast());
+        
+        System.out.println("\nHASH MAP SPEED TEST\n");
+        
+        Map<String, Book> map = new HashMap<>();
+        MapHandler mapHandler = new MapHandler();
+        ISBN isbn = new ISBN();
+        
+        //rewriting data from linked list to hash map
+        for(Book book: list) {
+            map.put(isbn.next(""), book);
+        }
+        mapHandler.add(map, "111-111-111-111", new Book("Robert C. Martin", "Clean Code"));
+        mapHandler.add(map, "222-222-222-222", new Book("Robert C. Martin", "Clean Code 2"));
+                
+        mapHandler.find(map, "111-111-111-111");
+        mapHandler.find(map, "222-222-222-222");
+        mapHandler.find(map, "111-111-111-111"); // second attempt a lot faster
+        
+        mapHandler.delete(map, "111-111-111-111");
+        mapHandler.delete(map, "222-222-222-222");        
+    }
+}
+
+class Book {
+    private String author;
+    private String title;
+    
+    public Book (String author, String title) {
+        this.author = author;
+        this.title = title;
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.author.hashCode() * this.title.hashCode();
+    }
+        
+    @Override
+    public boolean equals(Object o) {
+        Book b = (Book)o;
+        return this.author.equals(b.author) && this.title.equals(b.title);
+    }
+    
+    @Override
+    public String toString() {
+        return this.author+" \""+this.title+"\"";
+    }
+}
+
+class ISBN {
+    public String next(String code) {
+        if (code!="") {
+            return code;
+        } else {
+            String generatedCode="";
+            for(int i=0; i<4; i++) {
+                generatedCode+=Main.random.nextInt(10);
+                generatedCode+=Main.random.nextInt(10);
+                generatedCode+=Main.random.nextInt(10);
+                if (i<3) generatedCode+="-";
+            }return generatedCode;
+        }
+    }
+}
+
+class StringGenerator {
+    public String run(int stringLength) {
+        String string ="";
+        for(int i=0; i < stringLength; i++) {
+            string += Main.chars[Main.random.nextInt(Main.chars.length)];
+        }
+        return string;
+    }
+}
+
+class ListHandler {
+    public void delete(LinkedList<Book> list, Book choosen) {
+        System.out.println("list size: " +list.size()); 
+        System.out.println("choosen element: [" + list.indexOf(choosen) + "] " + choosen);
+        System.out.println("Deleting...");
+        long begin = System.nanoTime();        
+        list.remove(choosen); 
+        long end = System.nanoTime();
+        System.out.println("Done!");
+        System.out.println("duration: " + (end-begin) + "ns");
+        System.out.println("list size: " +list.size()); 
+        System.out.println();
+    }
+    
+    public void add(LinkedList<Book> list, Book book, int index) {
+        System.out.println("list size: " + list.size()); 
+        System.out.println("adding element: " + book + " at position [" + index + "]");
+        long begin = System.nanoTime();       
+        list.add(index, book);
+        long end = System.nanoTime();
+        System.out.println("Done!");
+        System.out.println("duration: " + (end-begin) + "ns");
+        System.out.println("list size: " +list.size()); 
+        System.out.println();
+    }
+}
+    
+class MapHandler {
+    public void find(Map<String, Book> map, String code) {
+        System.out.println("Looking for book with ISBN " + code + "...");
+        long begin = System.nanoTime();
+        Book found = map.get(code);
+        long end = System.nanoTime();
+        System.out.println("Book found: " + found);
+        System.out.println("duration: " + (end-begin) + "ns");
+        System.out.println();
+    }
+        
+    public void delete(Map<String, Book> map, String code) {
+        System.out.println("map size: " +map.size()); 
+        System.out.println("selected element: ISBN " + code + ", " + map.get(code));
+        System.out.println("Deleting...");
+        long begin = System.nanoTime();        
+        map.remove(code);
+        long end = System.nanoTime();
+        System.out.println("Done!");
+        System.out.println("duration: " + (end-begin) + "ns");
+        System.out.println("map size: " +map.size()); 
+        System.out.println();
+    }
+    
+    public void add(Map<String, Book> map, String code, Book book) {
+        System.out.println("map size: " +map.size()); 
+        System.out.println("declared element: ISBN " + code + ", " + book);
+        System.out.println("Adding...");
+        long begin = System.nanoTime();        
+        map.put(code, book);
+        long end = System.nanoTime();
+        System.out.println("Done!");
+        System.out.println("duration: " + (end-begin) + "ns");
+        System.out.println("map size: " +map.size()); 
+        System.out.println();
+    }   
+    
+}
+
+/*
+Część 1
+
+Stwórz klasę reprezentującą książkę o nazwie Book. 
+Klasa powinna mieć dwa pola: author oraz title. 
+Pamiętaj o implementacji metod hashCode() oraz equals(Object o). 
+Będziemy jej używali jako obiektów kolekcji LinkedList w tej części zadania, 
+oraz jako obiektów kolekcji HashMap w drugiej części zadania.
+
+Stwórz program, który zmierzy czas operacji wyszukiwania 
+i usunięcia obiektu na początku (z użyciem metody remove(Object o)), 
+wyszukiwania i usunięcia obiektu na końcu (z użyciem metody remove(Object o)), 
+wstawiania na początku oraz wstawiania na końcu listy LinkedList 
+liczącej kilkaset tysięcy obiektów.
+
+Część 2
+
+Stwórz program, który zmierzy czas operacji wyszukiwania po kluczu, 
+a także czas dodawania i usuwania obiektu z mapy HashMap liczącej kilkaset 
+tysięcy obiektów. Postaraj się, aby kluczem w mapie nie była wartość liczbowa.
+*/
